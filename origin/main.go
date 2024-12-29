@@ -17,10 +17,11 @@ func main() {
 			fmt.Printf("[origin server] received request at: %s\n", time.Now())
 
 			response := map[string]string{
-				"time": time.Now().UTC().Format(time.RFC3339),
+				"source": "Origin Server",
+				"time":   time.Now().UTC().Format(time.RFC3339),
 			}
 
-			_, _ = fmt.Fprint(rw, "origin server response\n")
+			fmt.Fprint(rw, "origin server response\n")
 			json.NewEncoder(rw).Encode(response)
 		})
 
