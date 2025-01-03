@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -27,15 +27,17 @@ func main() {
 			req.URL.Scheme = originServerURL.Scheme
 			req.RequestURI = ""
 
-			response := map[string]string{
-				"source": "Reverse Proxy Server",
-				"time":   time.Now().UTC().Format(time.RFC3339),
+			// Forwarding the request to the origin server
+			originServerResponse, err := http.DefaultClient.Do(req)
+
+			if err != nil {
+				rw.WriteHeader(originServerResponse.StatusCode)
+				fmt.Fprint(rw, err)
+				return
 			}
 
-			http.DefaultClient.Do(req)
-
-			fmt.Fprint(rw, "reverse proxy server response\n")
-			json.NewEncoder(rw).Encode(response)
+			rw.WriteHeader(originServerResponse.StatusCode)
+			io.Copy(rw, originServerResponse.Body)
 
 		})
 
